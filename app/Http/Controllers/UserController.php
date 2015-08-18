@@ -3,7 +3,8 @@
 namespace App\Http\Controllers;
 
 use Illuminate\Http\Request;
-
+use App\Hash;
+use Validator;
 use App\Http\Requests;
 use App\Http\Controllers\Controller;
 
@@ -35,6 +36,7 @@ class UserController extends Controller
         
     }
 
+
     /**
      * Show the form for creating a new resource.
      *
@@ -42,7 +44,7 @@ class UserController extends Controller
      */
     public function create()
     {
-        //
+        return view('user.register');
     }
 
     /**
@@ -50,9 +52,10 @@ class UserController extends Controller
      *
      * @return Response
      */
-    public function store()
+    public function store(Request $request)
     {
-        //
+              $validator = Validator::make($request->all());
+              dd($validator);
     }
 
     /**

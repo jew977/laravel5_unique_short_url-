@@ -1,9 +1,11 @@
 <?php
 
 namespace App\Http\Controllers\Auth;
-
+use Illuminate\Http\Request;
+use App\Http\Requests;
 use App\User;
 use Validator;
+use Auth;
 use App\Http\Controllers\Controller;
 use Illuminate\Foundation\Auth\ThrottlesLogins;
 use Illuminate\Foundation\Auth\AuthenticatesAndRegistersUsers;
@@ -28,6 +30,8 @@ class AuthController extends Controller
      *
      * @return void
      */
+    protected $redirectPath = '/url';
+    protected $loginPath = '/login';
     public function __construct()
     {
         $this->middleware('guest', ['except' => 'getLogout']);
@@ -45,6 +49,7 @@ class AuthController extends Controller
             'name' => 'required|max:255',
             'email' => 'required|email|max:255|unique:users',
             'password' => 'required|confirmed|min:6',
+            'password_confirmation' => 'required'
         ]);
     }
 
@@ -56,10 +61,49 @@ class AuthController extends Controller
      */
     protected function create(array $data)
     {
-        return User::create([
+        $user=new User([
             'name' => $data['name'],
             'email' => $data['email'],
             'password' => bcrypt($data['password']),
         ]);
+       $user->save();
+       return $user;
     }
+    public function getRegister(){
+    return view('auth.register');
+    }
+
+
+
+    public function postRegister(Request $request){
+       // dd($this->create($request->all()));
+     $validator=$this->validator($request->all());
+     if($validator->fails()){
+           $this->throwValidationException($request,$validator);
+     }
+     $user=$this->create($request->all());
+     return view('auth.login');
+    }
+
+
+    public function getLogin(){
+    return view('auth.login');
+    }
+
+
+
+    public function postLogin(Request $request){
+            $name=$request->input('name');         
+            $password=$request->input('password');
+           if (Auth::attempt(['name' => $name, 'password' => $password])) {
+            // Authentication passed...
+            return redirect('url');
+        }
+      return redirect('auth.login')->with('message','用户名或密码不正确')->withIput();
+    }
+
+    public function getLogout(){
+        Auth::logout();
+    }
+
 }
